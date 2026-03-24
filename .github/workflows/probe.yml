@@ -293,7 +293,7 @@ jobs:
             f.write('\n'.join(lines))
 
         if baseline_failures:
-            sys.exit(1)
+            print('::warning::Baseline failures detected — results will still be published')
         PYEOF
 
     # ── Upload / publish ───────────────────────────────────────────

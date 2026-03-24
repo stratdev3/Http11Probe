@@ -6,8 +6,8 @@ weight: 3
 
 | | |
 |---|---|
-| **Test ID** | `COMP-UPGRADE-UNKNOWN` |
-| **Category** | Compliance |
+| **Test ID** | `WS-UPGRADE-UNKNOWN` |
+| **Category** | WebSockets |
 | **RFC** | [RFC 9110 Section 7.8](https://www.rfc-editor.org/rfc/rfc9110#section-7.8) |
 | **Requirement** | MUST NOT switch |
 | **Expected** | any non-`101` response |

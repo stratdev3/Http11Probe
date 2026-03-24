@@ -27,24 +27,6 @@ sealed class GetRoot : EndpointWithoutRequest
     }
 }
 
-// ── HEAD / ─────────────────────────────────────────────────────
-
-sealed class HeadRoot : EndpointWithoutRequest
-{
-    public override void Configure()
-    {
-        Verbs("HEAD");
-        Routes("/");
-        AllowAnonymous();
-    }
-
-    public override async Task HandleAsync(CancellationToken ct)
-    {
-        HttpContext.Response.StatusCode = 200;
-        await HttpContext.Response.WriteAsync("", ct);
-    }
-}
-
 // ── POST / ─────────────────────────────────────────────────────
 
 sealed class PostRoot : EndpointWithoutRequest
@@ -60,25 +42,6 @@ sealed class PostRoot : EndpointWithoutRequest
         using var reader = new StreamReader(HttpContext.Request.Body);
         var body = await reader.ReadToEndAsync(ct);
         await HttpContext.Response.WriteAsync(body, ct);
-    }
-}
-
-// ── OPTIONS / ──────────────────────────────────────────────────
-
-sealed class OptionsRoot : EndpointWithoutRequest
-{
-    public override void Configure()
-    {
-        Verbs("OPTIONS");
-        Routes("/");
-        AllowAnonymous();
-    }
-
-    public override async Task HandleAsync(CancellationToken ct)
-    {
-        HttpContext.Response.Headers["Allow"] = "GET, HEAD, POST, OPTIONS";
-        HttpContext.Response.StatusCode = 200;
-        await HttpContext.Response.WriteAsync("", ct);
     }
 }
 
@@ -102,13 +65,14 @@ sealed class CookieEndpoint : EndpointWithoutRequest
     }
 }
 
-// ── POST /echo ─────────────────────────────────────────────────
+// ── GET/POST /echo ────────────────────────────────────────────
 
-sealed class PostEcho : EndpointWithoutRequest
+sealed class EchoEndpoint : EndpointWithoutRequest
 {
     public override void Configure()
     {
-        Post("/echo");
+        Verbs("GET", "POST");
+        Routes("/echo");
         AllowAnonymous();
     }
 

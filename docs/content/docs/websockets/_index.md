@@ -1,6 +1,6 @@
 ---
-title: Upgrade / WebSocket
-description: "Upgrade / WebSocket — Http11Probe documentation"
+title: WebSockets
+description: "WebSockets — Http11Probe documentation"
 weight: 12
 sidebar:
   open: false
@@ -26,6 +26,7 @@ The HTTP `Upgrade` mechanism allows a client to request switching to a different
   {{< card link="upgrade-post" title="UPGRADE-POST" subtitle="WebSocket upgrade via POST must not return 101." >}}
   {{< card link="upgrade-missing-conn" title="UPGRADE-MISSING-CONN" subtitle="Upgrade without Connection: Upgrade must not switch." >}}
   {{< card link="upgrade-unknown" title="UPGRADE-UNKNOWN" subtitle="Upgrade to unknown protocol must not return 101." >}}
+  {{< card link="upgrade-http10" title="UPGRADE-HTTP10" subtitle="Upgrade header in HTTP/1.0 request must be ignored." >}}
 {{< /cards >}}
 
 ### Unscored

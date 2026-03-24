@@ -273,11 +273,11 @@ Your server MUST listen on **port 8080** and implement these endpoints:
 | Endpoint | Method | Behavior |
 |----------|--------|----------|
 | `/` | `GET` | Return `200 OK` |
-| `/` | `HEAD` | Return `200 OK` with no body |
 | `/` | `POST` | Read the full request body and return it in the response body |
-| `/` | `OPTIONS` | Return `200 OK` |
 | `/echo` | `GET`, `POST` | Return all received request headers in the response body, one per line as `Name: Value` |
 | `/cookie` | `GET`, `POST` | Parse the `Cookie` header and return each cookie as `name=value` on its own line |
+
+HEAD and OPTIONS are handled automatically by virtually all frameworks — do not implement them explicitly.
 
 The `/echo` endpoint is critical for normalization tests. It must echo back all headers the server received, preserving the names as the server internally represents them.
 

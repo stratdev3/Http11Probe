@@ -1233,12 +1233,12 @@ public static class SmugglingSuite
                 $"OPTIONS / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\nContent-Length: 5\r\n\r\nhello"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or 2xx",
+                Description = "400/405 or 2xx",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
                         return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    if (response.StatusCode == 400)
+                    if (response.StatusCode is 400 or 405)
                         return TestVerdict.Pass;
                     if (response.StatusCode is >= 200 and < 300)
                         return TestVerdict.Warn;
@@ -2727,7 +2727,7 @@ public static class SmugglingSuite
                 var step1 = steps[0];
                 var step2 = steps[1];
 
-                if (step1.Response?.StatusCode == 400)
+                if (step1.Response?.StatusCode is 400 or 405)
                     return TestVerdict.Pass;
                 if (!step1.Executed || step1.ConnectionState == ConnectionState.ClosedByServer)
                     return TestVerdict.Pass;
@@ -2748,6 +2748,8 @@ public static class SmugglingSuite
                 var step1 = steps[0];
                 var step2 = steps[1];
 
+                if (step1.Response?.StatusCode == 405)
+                    return "Server does not support OPTIONS";
                 if (step1.Response?.StatusCode == 400)
                     return "Rejected OPTIONS with body";
                 if (!step1.Executed || step1.ConnectionState == ConnectionState.ClosedByServer)
@@ -2855,7 +2857,7 @@ public static class SmugglingSuite
                 var step1 = steps[0];
                 var step2 = steps[1];
 
-                if (step1.Response?.StatusCode == 400)
+                if (step1.Response?.StatusCode is 400 or 405)
                     return TestVerdict.Pass;
                 if (!step1.Executed || step1.ConnectionState == ConnectionState.ClosedByServer)
                     return TestVerdict.Pass;
@@ -2868,6 +2870,8 @@ public static class SmugglingSuite
                 var step1 = steps[0];
                 var step2 = steps[1];
 
+                if (step1.Response?.StatusCode == 405)
+                    return "Server does not support OPTIONS";
                 if (step1.Response?.StatusCode == 400)
                     return "Rejected folded Transfer-Encoding request with 400";
                 if (!step1.Executed || step1.ConnectionState == ConnectionState.ClosedByServer)

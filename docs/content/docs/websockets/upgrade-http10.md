@@ -6,8 +6,8 @@ weight: 5
 
 | | |
 |---|---|
-| **Test ID** | `COMP-UPGRADE-HTTP10` |
-| **Category** | Compliance |
+| **Test ID** | `WS-UPGRADE-HTTP10` |
+| **Category** | WebSockets |
 | **Scored** | Yes |
 | **RFC** | [RFC 9110 §7.8](https://www.rfc-editor.org/rfc/rfc9110#section-7.8) |
 | **RFC Level** | MUST |

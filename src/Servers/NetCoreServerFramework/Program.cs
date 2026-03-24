@@ -51,7 +51,19 @@ class OkHttpSession : HttpSession
             SendResponseAsync(Response.MakeOkResponse(200).SetBody(sb.ToString()));
         }
         else if (request.Method == "POST" && request.Body.Length > 0)
-            SendResponseAsync(Response.MakeOkResponse(200).SetBody(request.Body));
+        {
+            // NetCoreServer's Body may include unparsed headers; strip them.
+            var body = request.Body;
+            var sep = body.IndexOf("\r\n\r\n");
+            if (sep >= 0)
+                body = body[(sep + 4)..];
+            // Build response manually — MakeOkResponse + SetBody produces
+            // a duplicate Content-Length, resulting in a malformed response.
+            var bytes = System.Text.Encoding.UTF8.GetBytes(body);
+            var raw = $"HTTP/1.1 200 OK\r\nContent-Length: {bytes.Length}\r\n\r\n";
+            SendAsync(System.Text.Encoding.UTF8.GetBytes(raw));
+            SendAsync(bytes);
+        }
         else
             SendResponseAsync(Response.MakeOkResponse(200).SetBody("OK"));
     }

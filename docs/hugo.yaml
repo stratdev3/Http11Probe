@@ -52,6 +52,11 @@ menu:
       parent: test-details
       pageRef: /cookies
       weight: 6
+    - name: WebSockets
+      identifier: test-details-websockets
+      parent: test-details
+      pageRef: /websockets
+      weight: 7
     - name: Glossary
       identifier: glossary
       pageRef: /docs
@@ -92,6 +97,12 @@ menu:
       url: https://github.com/MDA2AV/Http11Probe
       params:
         icon: github
+
+outputs:
+  home: [html]
+  section: [html]
+  taxonomy: [html]
+  term: [html]
 
 params:
   theme:

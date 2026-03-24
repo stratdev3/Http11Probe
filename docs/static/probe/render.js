@@ -310,11 +310,11 @@ window.ProbeRender = (function () {
     'COMP-UNKNOWN-TE-501': '/Http11Probe/docs/request-line/unknown-te-501/',
     'COMP-RANGE-INVALID': '/Http11Probe/docs/body/range-invalid/',
     'COMP-RANGE-POST': '/Http11Probe/docs/body/range-post/',
-    'COMP-UPGRADE-HTTP10': '/Http11Probe/docs/upgrade/upgrade-http10/',
-    'COMP-UPGRADE-INVALID-VER': '/Http11Probe/docs/upgrade/upgrade-invalid-ver/',
-    'COMP-UPGRADE-MISSING-CONN': '/Http11Probe/docs/upgrade/upgrade-missing-conn/',
-    'COMP-UPGRADE-POST': '/Http11Probe/docs/upgrade/upgrade-post/',
-    'COMP-UPGRADE-UNKNOWN': '/Http11Probe/docs/upgrade/upgrade-unknown/',
+    'WS-UPGRADE-HTTP10': '/Http11Probe/docs/websockets/upgrade-http10/',
+    'WS-UPGRADE-INVALID-VER': '/Http11Probe/docs/websockets/upgrade-invalid-ver/',
+    'WS-UPGRADE-MISSING-CONN': '/Http11Probe/docs/websockets/upgrade-missing-conn/',
+    'WS-UPGRADE-POST': '/Http11Probe/docs/websockets/upgrade-post/',
+    'WS-UPGRADE-UNKNOWN': '/Http11Probe/docs/websockets/upgrade-unknown/',
     'COMP-VERSION-CASE': '/Http11Probe/docs/request-line/version-case/',
     'COMP-ACCEPT-NONSENSE': '/Http11Probe/docs/headers/accept-nonsense/',
     'COMP-WHITESPACE-BEFORE-HEADERS': '/Http11Probe/docs/headers/whitespace-before-headers/',
@@ -747,7 +747,7 @@ window.ProbeRender = (function () {
     el.innerHTML = html;
   }
 
-  var CAT_LABELS = { Compliance: 'Compliance', Smuggling: 'Smuggling', MalformedInput: 'Malformed Input', Normalization: 'Normalization', Capabilities: 'Caching', Cookies: 'Cookies' };
+  var CAT_LABELS = { Compliance: 'Compliance', Smuggling: 'Smuggling', MalformedInput: 'Malformed Input', Normalization: 'Normalization', Capabilities: 'Caching', Cookies: 'Cookies', WebSockets: 'WebSockets' };
 
   function renderTable(targetId, categoryKey, ctx, testIdFilter, tableLabel) {
     injectScrollStyle();
@@ -770,7 +770,7 @@ window.ProbeRender = (function () {
     var orderedTests = scoredTests.concat(unscoredTests);
 
     var shortLabels = orderedTests.map(function (tid) {
-      return tid.replace(/^(RFC\d+-[\d.]+-|COMP-|SMUG-|MAL-|NORM-|COOK-)/, '');
+      return tid.replace(/^(RFC\d+-[\d.]+-|COMP-|SMUG-|MAL-|NORM-|COOK-|WS-)/, '');
     });
 
     var unscoredStart = scoredTests.length;
@@ -952,7 +952,7 @@ window.ProbeRender = (function () {
           var r = lookup[svName] && lookup[svName][tid];
           var isUnscored = first.scored === false;
           var opacity = isUnscored ? 'opacity:0.55;' : '';
-          var shortLabel = tid.replace(/^(RFC\d+-[\d.]+-|COMP-|SMUG-|MAL-|NORM-)/, '');
+          var shortLabel = tid.replace(/^(RFC\d+-[\d.]+-|COMP-|SMUG-|MAL-|NORM-|WS-)/, '');
           var url = testUrl(tid);
           var testLink = url
             ? '<a href="' + url + '" style="color:#58a6ff;text-decoration:underline;text-underline-offset:2px;">' + shortLabel + '</a>'
@@ -1272,7 +1272,8 @@ window.ProbeRender = (function () {
       { label: 'Smuggling', categories: ['Smuggling'] },
       { label: 'Malformed Input', categories: ['MalformedInput'] },
       { label: 'Normalization', categories: ['Normalization'] },
-      { label: 'Caching', categories: ['Capabilities'] }
+      { label: 'Caching', categories: ['Capabilities'] },
+      { label: 'WebSockets', categories: ['WebSockets'] }
     ];
 
     var html = '<div style="display:flex;align-items:center;flex-wrap:wrap;">';

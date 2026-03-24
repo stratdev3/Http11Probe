@@ -16,19 +16,10 @@ http:
       rule: "PathPrefix(`/`)"
       entryPoints:
         - web
-      middlewares:
-        - static-ok
-      service: noop@internal
+      service: echo-svc
 
   services:
     echo-svc:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:9090"
-
-  middlewares:
-    static-ok:
-      plugin:
-        staticresponse:
-          statusCode: 200
-          body: "OK"

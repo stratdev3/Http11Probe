@@ -5,8 +5,8 @@ env | grep '^HTTP_' | while IFS='=' read -r key value; do
     printf '%s: %s\n' "$name" "$value"
 done
 if [ -n "$CONTENT_TYPE" ]; then
-    printf 'Content-Type: %s\n' "$CONTENT_TYPE"
+    printf 'CONTENT-TYPE: %s\n' "$CONTENT_TYPE"
 fi
 if [ -n "$CONTENT_LENGTH" ]; then
-    printf 'Content-Length: %s\n' "$CONTENT_LENGTH"
+    printf 'CONTENT-LENGTH: %s\n' "$CONTENT_LENGTH"
 fi

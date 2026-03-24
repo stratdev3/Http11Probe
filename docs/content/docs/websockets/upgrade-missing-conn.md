@@ -6,8 +6,8 @@ weight: 2
 
 | | |
 |---|---|
-| **Test ID** | `COMP-UPGRADE-MISSING-CONN` |
-| **Category** | Compliance |
+| **Test ID** | `WS-UPGRADE-MISSING-CONN` |
+| **Category** | WebSockets |
 | **RFC** | [RFC 9110 Section 7.8](https://www.rfc-editor.org/rfc/rfc9110#section-7.8) |
 | **Requirement** | MUST NOT switch |
 | **Expected** | any non-`101` response |

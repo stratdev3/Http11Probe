@@ -9,5 +9,6 @@ public enum TestCategory
     Injection,
     Normalization,
     Capabilities,
-    Cookies
+    Cookies,
+    WebSockets
 }

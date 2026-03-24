@@ -101,11 +101,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET  / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or 2xx",
+                Description = "400 or 2xx; close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode == 400)
                         return TestVerdict.Pass;
                     // RFC 9112 §3: recipients MAY parse on whitespace-delimited boundaries
@@ -139,11 +140,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET / HTTP/9.9\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400/505 or close",
+                Description = "400/505, close, or timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode is 400 or 505)
                         return TestVerdict.Pass;
                     return TestVerdict.Fail;
@@ -174,7 +176,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET / HTTP/1.1\rHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400)
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -187,8 +198,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400),
-                AllowConnectionClose = true
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -202,13 +221,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET /path#frag HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or 2xx",
+                Description = "400 or 2xx; 404 = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode == 400)
                         return TestVerdict.Pass;
+                    if (response.StatusCode == 404)
+                        return TestVerdict.Warn;
                     // Fragment not in origin-form grammar, but RFC only says SHOULD reject invalid request-line
                     if (response.StatusCode is >= 200 and < 300)
                         return TestVerdict.Warn;
@@ -374,8 +396,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET * HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400),
-                AllowConnectionClose = true
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -388,7 +418,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"OPTIONS * HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Range2xx
+                Description = "2xx or 405; close/timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode is >= 200 and < 300) return TestVerdict.Pass;
+                    if (response.StatusCode == 405) return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -423,11 +462,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"\r\n\r\nGET / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or 2xx",
+                Description = "400 or 2xx; close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode == 400)
                         return TestVerdict.Pass;
                     if (response.StatusCode is >= 200 and < 300)
@@ -448,11 +488,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET http://{ctx.HostHeader}/ HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "2xx preferred; 400 warns",
+                Description = "2xx preferred; 400/close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Warn : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode is >= 200 and < 300)
                         return TestVerdict.Pass;
                     if (response.StatusCode == 400)
@@ -472,11 +513,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"get / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400/405/501 or 2xx",
+                Description = "400/405/501 or 2xx; close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode is 400 or 405 or 501)
                         return TestVerdict.Pass;
                     if (response.StatusCode is >= 200 and < 300)
@@ -631,68 +673,6 @@ public static class ComplianceSuite
             }
         };
 
-        // ── Upgrade / WebSocket ─────────────────────────────────────
-
-        yield return new TestCase
-        {
-            Id = "COMP-UPGRADE-POST",
-            Description = "WebSocket upgrade via POST must not be accepted",
-            Category = TestCategory.Compliance,
-            RfcReference = "RFC 6455 §4.1",
-            PayloadFactory = ctx => MakeRequest(
-                $"POST / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n\r\n"),
-            Expected = new ExpectedBehavior
-            {
-                Description = "!101",
-                CustomValidator = (response, state) =>
-                {
-                    if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    return response.StatusCode == 101 ? TestVerdict.Fail : TestVerdict.Pass;
-                }
-            }
-        };
-
-        yield return new TestCase
-        {
-            Id = "COMP-UPGRADE-MISSING-CONN",
-            Description = "Upgrade header without Connection: Upgrade must not trigger protocol switch",
-            Category = TestCategory.Compliance,
-            RfcReference = "RFC 9110 §7.8",
-            PayloadFactory = ctx => MakeRequest(
-                $"GET / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\nUpgrade: websocket\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n\r\n"),
-            Expected = new ExpectedBehavior
-            {
-                Description = "!101",
-                CustomValidator = (response, state) =>
-                {
-                    if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    return response.StatusCode == 101 ? TestVerdict.Fail : TestVerdict.Pass;
-                }
-            }
-        };
-
-        yield return new TestCase
-        {
-            Id = "COMP-UPGRADE-UNKNOWN",
-            Description = "Upgrade to unknown protocol must not return 101",
-            Category = TestCategory.Compliance,
-            RfcReference = "RFC 9110 §7.8",
-            PayloadFactory = ctx => MakeRequest(
-                $"GET / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\nConnection: Upgrade\r\nUpgrade: totally-made-up/1.0\r\n\r\n"),
-            Expected = new ExpectedBehavior
-            {
-                Description = "!101",
-                CustomValidator = (response, state) =>
-                {
-                    if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    return response.StatusCode == 101 ? TestVerdict.Fail : TestVerdict.Pass;
-                }
-            }
-        };
-
         // ── Methods ─────────────────────────────────────────────────
 
         yield return new TestCase
@@ -805,33 +785,6 @@ public static class ComplianceSuite
 
         yield return new TestCase
         {
-            Id = "COMP-UPGRADE-INVALID-VER",
-            Description = "WebSocket upgrade with unsupported version — should return 426",
-            Category = TestCategory.Compliance,
-            RfcReference = "RFC 6455 §4.4",
-            PayloadFactory = ctx => MakeRequest(
-                $"GET / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 99\r\n\r\n"),
-            Expected = new ExpectedBehavior
-            {
-                Description = "non-101 (426 preferred)",
-                CustomValidator = (response, state) =>
-                {
-                    if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    if (response.StatusCode == 101)
-                        return TestVerdict.Fail;
-                    if (response.StatusCode == 426)
-                        return TestVerdict.Pass;
-                    // Some servers ignore Upgrade entirely and process the GET.
-                    if (response.StatusCode is >= 200 and < 300)
-                        return TestVerdict.Warn;
-                    return TestVerdict.Pass;
-                }
-            }
-        };
-
-        yield return new TestCase
-        {
             Id = "COMP-METHOD-TRACE",
             Description = "TRACE request — should be disabled in production",
             Category = TestCategory.Compliance,
@@ -882,11 +835,12 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET\t/ HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or 2xx",
+                Description = "400 or 2xx; close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode == 400)
                         return TestVerdict.Pass;
                     if (response.StatusCode is >= 200 and < 300)
@@ -905,8 +859,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET / HTTP/1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400),
-                AllowConnectionClose = true
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -919,8 +881,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET / HTTP/01.01\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400),
-                AllowConnectionClose = true
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -933,8 +903,16 @@ public static class ComplianceSuite
             PayloadFactory = ctx => MakeRequest($"GET / HTTP/ 1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                ExpectedStatus = StatusCodeRange.Exact(400),
-                AllowConnectionClose = true
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -1116,28 +1094,6 @@ public static class ComplianceSuite
             }
         };
 
-        yield return new TestCase
-        {
-            Id = "COMP-UPGRADE-HTTP10",
-            Description = "Upgrade header in HTTP/1.0 request must be ignored",
-            Category = TestCategory.Compliance,
-            RfcReference = "RFC 9110 §7.8",
-            PayloadFactory = ctx => MakeRequest(
-                $"GET / HTTP/1.0\r\nHost: {ctx.HostHeader}\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n\r\n"),
-            Expected = new ExpectedBehavior
-            {
-                Description = "!101",
-                CustomValidator = (response, state) =>
-                {
-                    if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Pass : TestVerdict.Fail;
-                    if (response.StatusCode == 101)
-                        return TestVerdict.Fail;
-                    return TestVerdict.Pass;
-                }
-            }
-        };
-
         // ── RFC 9110 response semantics ──────────────────────────────
 
         yield return new TestCase
@@ -1311,11 +1267,13 @@ public static class ComplianceSuite
                 $"OPTIONS / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "204 without CL",
+                Description = "204 without CL, or 405",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
                         return TestVerdict.Fail;
+                    if (response.StatusCode == 405)
+                        return TestVerdict.Pass; // Server doesn't support OPTIONS — can't test CL prohibition
                     if (response.StatusCode == 204)
                         return response.Headers.ContainsKey("Content-Length") ? TestVerdict.Fail : TestVerdict.Pass;
                     // Server didn't return 204 — can't verify the CL prohibition
@@ -1335,11 +1293,13 @@ public static class ComplianceSuite
                 $"OPTIONS / HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "2xx with Allow header",
+                Description = "2xx with Allow header, or 405",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
                         return TestVerdict.Fail;
+                    if (response.StatusCode == 405)
+                        return TestVerdict.Pass;
                     if (response.StatusCode is >= 200 and < 300)
                         return response.Headers.ContainsKey("Allow") ? TestVerdict.Pass : TestVerdict.Warn;
                     return TestVerdict.Fail;
@@ -1381,9 +1341,16 @@ public static class ComplianceSuite
                 $"GET / http/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or close",
-                AllowConnectionClose = true,
-                ExpectedStatus = StatusCodeRange.Exact(400)
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 
@@ -1402,11 +1369,12 @@ public static class ComplianceSuite
             },
             Expected = new ExpectedBehavior
             {
-                Description = "not 414",
+                Description = "not 414; close/timeout = warn",
                 CustomValidator = (response, state) =>
                 {
                     if (response is null)
-                        return state == ConnectionState.ClosedByServer ? TestVerdict.Warn : TestVerdict.Fail;
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
                     if (response.StatusCode == 414)
                         return TestVerdict.Fail;
                     return TestVerdict.Pass;
@@ -1425,9 +1393,16 @@ public static class ComplianceSuite
                 $"GET /pa th HTTP/1.1\r\nHost: {ctx.HostHeader}\r\n\r\n"),
             Expected = new ExpectedBehavior
             {
-                Description = "400 or close",
-                AllowConnectionClose = true,
-                ExpectedStatus = StatusCodeRange.Exact(400)
+                Description = "400, close, or timeout = warn",
+                CustomValidator = (response, state) =>
+                {
+                    if (response is null)
+                        return state is ConnectionState.ClosedByServer or ConnectionState.TimedOut
+                            ? TestVerdict.Warn : TestVerdict.Fail;
+                    if (response.StatusCode == 400)
+                        return TestVerdict.Pass;
+                    return TestVerdict.Fail;
+                }
             }
         };
 

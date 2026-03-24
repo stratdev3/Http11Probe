@@ -6,14 +6,6 @@ var app = builder.Build();
 
 app.MapGet("/", () => "OK");
 
-app.MapMethods("/", ["HEAD"], () => Results.Ok());
-
-app.MapMethods("/", ["OPTIONS"], (HttpContext ctx) =>
-{
-    ctx.Response.Headers["Allow"] = "GET, HEAD, POST, OPTIONS";
-    return Results.Ok();
-});
-
 app.MapPost("/", async (HttpContext ctx) =>
 {
     using var reader = new StreamReader(ctx.Request.Body);

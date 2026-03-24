@@ -6,8 +6,8 @@ weight: 1
 
 | | |
 |---|---|
-| **Test ID** | `COMP-UPGRADE-POST` |
-| **Category** | Compliance |
+| **Test ID** | `WS-UPGRADE-POST` |
+| **Category** | WebSockets |
 | **RFC** | [RFC 6455 Section 4.1](https://www.rfc-editor.org/rfc/rfc6455#section-4.1) |
 | **Requirement** | MUST use GET |
 | **Expected** | any non-`101` response |

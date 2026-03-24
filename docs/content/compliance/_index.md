@@ -62,12 +62,10 @@ Each test sends a request that violates a specific **MUST** or **MUST NOT** requ
       'COMP-DUPLICATE-CT','COMP-POST-UNSUPPORTED-CT',
       'COMP-ACCEPT-NONSENSE'
     ]},
-    { key: 'methods-upgrade', label: 'Methods & Upgrade', testIds: [
+    { key: 'methods-headers', label: 'Methods & Headers', testIds: [
       'COMP-METHOD-CONNECT',
       'COMP-UNKNOWN-TE-501','COMP-EXPECT-UNKNOWN','COMP-METHOD-TRACE',
       'COMP-TRACE-WITH-BODY','COMP-TRACE-SENSITIVE',
-      'COMP-UPGRADE-POST','COMP-UPGRADE-MISSING-CONN',
-      'COMP-UPGRADE-UNKNOWN','COMP-UPGRADE-INVALID-VER','COMP-UPGRADE-HTTP10',
       'COMP-CONNECTION-CLOSE','COMP-HTTP10-DEFAULT-CLOSE','COMP-HTTP10-NO-HOST'
     ]}
   ];

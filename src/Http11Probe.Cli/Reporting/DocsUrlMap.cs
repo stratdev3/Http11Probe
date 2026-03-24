@@ -90,12 +90,6 @@ internal static class DocsUrlMap
         ["COMP-RANGE-INVALID"] = "body/range-invalid",
         ["COMP-RANGE-POST"] = "body/range-post",
 
-        // upgrade
-        ["COMP-UPGRADE-HTTP10"] = "upgrade/upgrade-http10",
-        ["COMP-UPGRADE-INVALID-VER"] = "upgrade/upgrade-invalid-ver",
-        ["COMP-UPGRADE-MISSING-CONN"] = "upgrade/upgrade-missing-conn",
-        ["COMP-UPGRADE-POST"] = "upgrade/upgrade-post",
-        ["COMP-UPGRADE-UNKNOWN"] = "upgrade/upgrade-unknown",
     };
 
     // Special cases where the doc filename doesn't match the ID suffix
@@ -140,6 +134,13 @@ internal static class DocsUrlMap
         {
             var suffix = testId[5..].ToLowerInvariant();
             return BaseUrl + "cookies/" + suffix;
+        }
+
+        // WS-* → websockets/{suffix}
+        if (testId.StartsWith("WS-", StringComparison.OrdinalIgnoreCase))
+        {
+            var suffix = testId[3..].ToLowerInvariant();
+            return BaseUrl + "websockets/" + suffix;
         }
 
         return null;
